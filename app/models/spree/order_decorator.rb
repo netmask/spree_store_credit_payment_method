@@ -9,8 +9,12 @@ module SpreeStoreCredits::OrderDecorator
   module InstanceMethods
     def create_gift_cards
       line_items.each do |item|
-        item.quantity.times do
-          Spree::VirtualGiftCard.create!(amount: item.price, currency: item.currency, purchaser: user, line_item: item) if item.gift_card?
+        gift_cards = Spree::GiftCardInformation.where line_item: item
+
+        item.quantity.times do |i|
+          virtual_card  = Spree::VirtualGiftCard.create!(amount: item.price, currency: item.currency, purchaser: user, line_item: item) if item.gift_card?
+          gift_cards[i - 1].virtual_gift_card = virtual_card
+          gift_cards[i - 1].save
         end
       end
     end
